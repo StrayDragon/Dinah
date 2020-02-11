@@ -1,0 +1,21 @@
+{
+  "explorer.file.hiddenRules": {
+    "extensions": [
+      "o",
+      "a",
+      "obj",
+      "pyc"
+    ],
+    "filenames": [],
+    "patternMatches": [
+      "^\\.",
+      "__pycache__/"
+    ]
+  },
+  "python.formatting.provider": "yapf",
+  // "python.linting.mypyEnabled": true,
+  "python.linting.enabled": true,
+  "python.linting.flake8Enabled": true,
+  "pyright.useLibraryCodeForTypes": true,
+  "pyright.disableLanguageServices": true
+}
