@@ -3,6 +3,7 @@
 Type
 Must be one of the following:
 - feat: A new feature
+- dev-feat: A new feature for developer
 - fix: A bug fix
 - docs: Documentation only changes
 - style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
