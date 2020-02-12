@@ -3,14 +3,14 @@
 ////////////////////////////////
 
 // Gulp and package
-const { src, dest, parallel, series, watch } = require('gulp')
+const {src, dest, parallel, series, watch} = require('gulp')
 const pjson = require('./package.json')
 
 // Plugins
 const autoprefixer = require('autoprefixer')
 const browserSync = require('browser-sync').create()
 
-const cssnano = require ('cssnano')
+const cssnano = require('cssnano')
 const imagemin = require('gulp-imagemin')
 const pixrem = require('pixrem')
 const plumber = require('gulp-plumber')
@@ -27,7 +27,7 @@ function pathsConfig(appName) {
   const vendorsRoot = 'node_modules'
 
   return {
-    
+
     app: this.app,
     templates: `${this.app}/templates`,
     css: `${this.app}/static/css`,
@@ -47,25 +47,25 @@ var paths = pathsConfig()
 // Styles autoprefixing and minification
 function styles() {
   var processCss = [
-      autoprefixer(), // adds vendor prefixes
-      pixrem(),       // add fallbacks for rem units
+    autoprefixer(), // adds vendor prefixes
+    pixrem(),       // add fallbacks for rem units
   ]
 
   var minifyCss = [
-      cssnano({ preset: 'default' })   // minify result
+    cssnano({preset: 'default'})   // minify result
   ]
 
   return src(`${paths.sass}/project.scss`)
     .pipe(sass({
       includePaths: [
-        
+
         paths.sass
       ]
     }).on('error', sass.logError))
     .pipe(plumber()) // Checks for errors
     .pipe(postcss(processCss))
     .pipe(dest(paths.css))
-    .pipe(rename({ suffix: '.min' }))
+    .pipe(rename({suffix: '.min'}))
     .pipe(postcss(minifyCss)) // Minifies the result
     .pipe(dest(paths.css))
 }
@@ -75,7 +75,7 @@ function scripts() {
   return src(`${paths.js}/project.js`)
     .pipe(plumber()) // Checks for errors
     .pipe(uglify()) // Minifies the js
-    .pipe(rename({ suffix: '.min' }))
+    .pipe(rename({suffix: '.min'}))
     .pipe(dest(paths.js))
 }
 
@@ -91,7 +91,7 @@ function imgCompression() {
 // Run django server
 function runServer(cb) {
   var cmd = spawn('python', ['manage.py', 'runserver'], {stdio: 'inherit'})
-  cmd.on('close', function(code) {
+  cmd.on('close', function (code) {
     console.log('runServer exited with code ' + code)
     cb(code)
   })
@@ -99,27 +99,27 @@ function runServer(cb) {
 
 // Browser sync server for live reload
 function initBrowserSync() {
-    browserSync.init(
-      [
-        `${paths.css}/*.css`,
-        `${paths.js}/*.js`,
-        `${paths.templates}/*.html`
-      ], {
-        // https://www.browsersync.io/docs/options/#option-proxy
-        proxy:  {
-          target: 'django:8000',
-          proxyReq: [
-            function(proxyReq, req) {
-              // Assign proxy "host" header same as current request at Browsersync server
-              proxyReq.setHeader('Host', req.headers.host)
-            }
-          ]
-        },
-        // https://www.browsersync.io/docs/options/#option-open
-        // Disable as it doesn't work from inside a container
-        open: false
-      }
-    )
+  browserSync.init(
+    [
+      `${paths.css}/*.css`,
+      `${paths.js}/*.js`,
+      `${paths.templates}/*.html`
+    ], {
+    // https://www.browsersync.io/docs/options/#option-proxy
+    proxy: {
+      target: 'django:8000',
+      proxyReq: [
+        function (proxyReq, req) {
+          // Assign proxy "host" header same as current request at Browsersync server
+          proxyReq.setHeader('Host', req.headers.host)
+        }
+      ]
+    },
+    // https://www.browsersync.io/docs/options/#option-open
+    // Disable as it doesn't work from inside a container
+    open: false
+  }
+  )
 }
 
 // Watch
@@ -133,7 +133,7 @@ function watchPaths() {
 const generateAssets = parallel(
   styles,
   scripts,
-  
+
   imgCompression
 )
 
