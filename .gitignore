@@ -1,3 +1,4 @@
+old.bak/
 .idea/
 node_modules/
 *.sqlite3

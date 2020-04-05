@@ -61,7 +61,7 @@ DATABASES = {
 # URLS
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
-ROOT_URLCONF = "old.config.urls"
+ROOT_URLCONF = "old.bak.config.urls"
 # https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
 WSGI_APPLICATION = "dinah.wsgi.application"
 
@@ -204,7 +204,7 @@ TEMPLATES = [{
             "django.template.context_processors.static",
             "django.template.context_processors.tz",
             "django.contrib.messages.context_processors.messages",
-            "old.utils.context_processors.settings_context",
+            "old.bak.utils.context_processors.settings_context",
         ],
     },
 }]
