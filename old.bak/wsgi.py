@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dinah.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dinah.config.settings")
 
 application = get_wsgi_application()
