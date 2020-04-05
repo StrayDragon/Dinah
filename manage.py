@@ -5,7 +5,9 @@ import sys
 
 
 def main():
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dinah.settings")
+    # os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dinah.settings')
+    level = os.environ.get("DINAH_CONFIG_LEVEL", "dev")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", f"dinah.settings.{level}")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
