@@ -6,7 +6,7 @@ class Category(models.Model):
     STATUS_NORMAL = 1
     STATUS_DELETE = 0
     STATUS = (
-        (STATUS_DELETE, "已删除"),
+        (STATUS_DELETE, "删除"),
         (STATUS_NORMAL, "正常"),
     )
     name = models.CharField(max_length=50, verbose_name="名称",)
@@ -20,12 +20,15 @@ class Category(models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "分类"
 
+    def __str__(self):
+        return self.name
+
 
 class Tag(models.Model):
     STATUS_NORMAL = 1
     STATUS_DELETE = 0
     STATUS = (
-        (STATUS_DELETE, "已删除"),
+        (STATUS_DELETE, "删除"),
         (STATUS_NORMAL, "正常"),
     )
     name = models.CharField(max_length=10, verbose_name="名称",)
@@ -38,13 +41,16 @@ class Tag(models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "标签"
 
+    def __str__(self):
+        return self.name
+
 
 class Post(models.Model):
     STATUS_NORMAL = 1
     STATUS_DELETE = 0
     STATUS_DRAFT = 2
     STATUS = (
-        (STATUS_DELETE, "已删除"),
+        (STATUS_DELETE, "删除"),
         (STATUS_NORMAL, "正常"),
         (STATUS_DRAFT, "草稿"),
     )
@@ -60,15 +66,18 @@ class Post(models.Model):
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
 
     class Meta:
-        verbose_name = verbose_name_plural = "标签"
+        verbose_name = verbose_name_plural = "文章"
         ordering = ["-id"]
+
+    def __str__(self):
+        return self.title
 
 
 class Link(models.Model):
     STATUS_NORMAL = 1
     STATUS_DELETE = 0
     STATUS = (
-        (STATUS_DELETE, "已删除"),
+        (STATUS_DELETE, "删除"),
         (STATUS_NORMAL, "正常"),
     )
     title = models.CharField(max_length=50, verbose_name="标题",)
@@ -84,6 +93,9 @@ class Link(models.Model):
 
     class Meta:
         verbose_name = verbose_name_plural = "友链"
+
+    def __str__(self):
+        return self.title
 
 
 class SideBar(models.Model):
@@ -115,12 +127,15 @@ class SideBar(models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "侧边栏"
 
+    def __str__(self):
+        return self.title
+
 
 class Comment(models.Model):
     STATUS_NORMAL = 1
     STATUS_DELETE = 0
     STATUS = (
-        (STATUS_DELETE, "已删除"),
+        (STATUS_DELETE, "删除"),
         (STATUS_NORMAL, "正常"),
     )
     target = models.ForeignKey(Post, verbose_name="评论文章", on_delete=models.CASCADE)
@@ -134,4 +149,4 @@ class Comment(models.Model):
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
 
     class Meta:
-        verbose_name = verbose_name_plural = "友链"
+        verbose_name = verbose_name_plural = "评论"
