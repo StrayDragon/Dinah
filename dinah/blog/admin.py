@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.admin.models import LogEntry
 from django.db.models.query import QuerySet
 from django.urls import reverse
 from django.utils.html import format_html
@@ -6,7 +7,16 @@ from django.utils.html import format_html
 from .models import Post, Category, Tag, Comment, Link, SideBar
 
 
-# Register your models here.
+class BaseOwnerAdmin(admin.ModelAdmin):
+    exclude = ("owner",)
+
+    def save_model(self, request, obj, form, change):
+        obj.owner = request.user
+        return super().save_model(request, obj, form, change)
+
+    def get_queryset(self, request):
+        qs: QuerySet = super().get_queryset(request)
+        return qs.filter(owner=request.user)
 
 
 class CategoryOwnerFilter(admin.SimpleListFilter):
@@ -24,7 +34,7 @@ class CategoryOwnerFilter(admin.SimpleListFilter):
 
 
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(BaseOwnerAdmin):
     list_display = ("name", "status", "is_nav", "created_time", "post_count")
     fields = ("name", "status", "is_nav")
 
@@ -39,18 +49,14 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 @admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
+class TagAdmin(BaseOwnerAdmin):
     list_display = ("name", "status", "created_time")
 
     fields = ("name", "status")
 
-    def save_model(self, request, obj, form, change):
-        obj.owner = request.user
-        return super().save_model(request, obj, form, change)
-
 
 @admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
+class PostAdmin(BaseOwnerAdmin):
     list_display = [
         "title",
         "category",
@@ -82,14 +88,6 @@ class PostAdmin(admin.ModelAdmin):
 
     operator.short_description = "操作"
 
-    def save_model(self, request, obj, form, change):
-        obj.owner = request.user
-        return super().save_model(request, obj, form, change)
-
-    def get_queryset(self, request):
-        qs: QuerySet = super().get_queryset(request)
-        return qs.filter(owner=request.user)
-
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
@@ -114,3 +112,8 @@ class SideBarAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.owner = request.owner
         return super().save_model(request, obj, form, change)
+
+
+@admin.register(LogEntry,)
+class LogEntryAdmin(admin.ModelAdmin):
+    list_display = ["object_repr", "object_id", "action_flag", "user", "change_message"]
