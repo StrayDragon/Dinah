@@ -1,5 +1,20 @@
+import dataclasses
+from typing import List, Optional, Dict, Any
+
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import QuerySet
+from django.template.loader import render_to_string
+
+from utils.shortcuts import render_mako_to_string
+
+DISPLAY_COMMENT = 4
+
+DISPLAY_HOT = 3
+
+DISPLAY_LATEST = 2
+
+DISPLAY_HTML = 1
 
 
 class Category(models.Model):
@@ -22,6 +37,25 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+    @dataclasses.dataclass
+    class NavsInfo:
+        navs: List["Category"]
+        categories: List["Category"]
+
+    @staticmethod
+    def get_navs() -> NavsInfo:
+        categories: QuerySet = Category.objects.filter(status=Category.STATUS_NORMAL)
+        # nav_categories = categories.filter(is_nav=True)
+        # normal_categories = categories.filter(is_nav=False)
+        nav_categories: List[Category] = []
+        normal_categories: List[Category] = []
+        for c in categories:
+            if c.is_nav:
+                nav_categories.append(c)
+            else:
+                normal_categories.append(c)
+        return Category.NavsInfo(navs=nav_categories, categories=normal_categories,)
 
 
 class Tag(models.Model):
@@ -54,6 +88,8 @@ class Post(models.Model):
         (STATUS_NORMAL, "正常"),
         (STATUS_DRAFT, "草稿"),
     )
+    pv = models.PositiveIntegerField(default=1)
+    uv = models.PositiveIntegerField(default=1)
     title = models.CharField(max_length=255, verbose_name="标题",)
     desc = models.CharField(max_length=1024, verbose_name="简要",)
     content = models.TextField(verbose_name="正文", help_text="正文使用MarkDown语法标注")
@@ -71,6 +107,43 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+    @staticmethod
+    def hot_posts() -> QuerySet:
+        return Post.objects.filter(status=Post.STATUS_NORMAL).order_by("-pv")
+
+    @staticmethod
+    def get_by_tag(tag_id: int) -> (List["Post"], Optional[Tag]):
+        tag = None
+        posts = []
+        if tag_id:
+            try:
+                tag = Tag.objects.get(id=tag_id)
+            except Tag.DoesNotExist:
+                pass
+            else:
+                posts = tag.post_set.filter(status=Post.STATUS_NORMAL).select_related(
+                    "owner", "category"
+                )
+        return posts, tag
+
+    @staticmethod
+    def get_by_category(category_id) -> (List["Post"], Optional[Category]):
+        category = None
+        posts = Post.objects.filter(status=Post.STATUS_NORMAL)
+        if category_id:
+            try:
+                category = Category.objects.get(id=category_id)
+            except Category.DoesNotExist:
+                pass
+            else:
+                posts = posts.filter(category_id=category_id)
+        return posts, category
+
+    @staticmethod
+    def latest_post() -> QuerySet:
+        qs: QuerySet = Post.objects.filter(status=Post.STATUS_NORMAL)
+        return qs
 
 
 class Link(models.Model):
@@ -106,10 +179,10 @@ class SideBar(models.Model):
         (STATUS_HIDE, "隐藏"),
     )
     SIDE_TYPES = (
-        (1, "HTML"),
-        (2, "最新文章"),
-        (3, "最热文章"),
-        (4, "最近评论"),
+        (DISPLAY_HTML, "HTML"),
+        (DISPLAY_LATEST, "最新文章"),
+        (DISPLAY_HOT, "最热文章"),
+        (DISPLAY_COMMENT, "最近评论"),
     )
     title = models.CharField(max_length=50, verbose_name="标题",)
     display_type = models.PositiveIntegerField(
@@ -129,6 +202,26 @@ class SideBar(models.Model):
 
     def __str__(self):
         return self.title
+
+    @staticmethod
+    def get_all() -> QuerySet:
+        return SideBar.objects.filter(status=SideBar.STATUS_SHOW)
+
+    @property
+    def content_html(self) -> str:
+        result = ""
+        if self.display_type == DISPLAY_HTML:
+            result = self.content
+        elif self.display_type == DISPLAY_LATEST:
+            ctx = {"posts": Post.latest_post()}
+            result = render_mako_to_string("blocks/sidebar_posts.mako", context=ctx)
+        elif self.display_type == DISPLAY_HOT:
+            ctx = {"posts": Post.hot_posts()}
+            result = render_mako_to_string("blocks/sidebar_posts.mako", context=ctx)
+        elif self.display_type == DISPLAY_HOT:
+            ctx = {"comments": Comment.objects.filter(status=Comment.STATUS_NORMAL)}
+            result = render_mako_to_string("blocks/sidebar_comments.mako", context=ctx)
+        return result
 
 
 class Comment(models.Model):
